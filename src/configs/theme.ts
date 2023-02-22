@@ -1,0 +1,32 @@
+import { extendTheme } from "native-base";
+
+const config = {
+    useSystemColorMode: false,
+    initialColorMode: 'light',
+}
+
+const colors = {
+    primary: {
+        50: '#E3F2F9',
+        100: '#C5E4F3',
+        200: '#A2D4EC',
+        300: '#7AC1E4',
+        400: '#47A9DA',
+        500: '#0088CC',
+        600: '#007AB8',
+        700: '#006BA1',
+        800: '#005885',
+        900: '#003F5E',
+    },
+
+}
+
+const breakpoints = {
+    base: 0,
+    sm: 480,
+    md: 768,
+    lg: 992,
+    xl: 1280,
+};
+
+export default extendTheme({ config, colors, breakpoints });

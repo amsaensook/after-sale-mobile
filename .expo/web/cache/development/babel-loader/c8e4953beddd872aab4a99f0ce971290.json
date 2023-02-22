@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default } from \"./ReturnPart\";","map":{"version":3,"names":["default"],"sources":["D:/Dev/after-sale-mobile/src/views/ReturnPart/index.ts"],"sourcesContent":["export {default} from './ReturnPart';"],"mappings":"AAAA,SAAQA,OAAR"},"metadata":{},"sourceType":"module"}

@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "AFTER-SALE",
+    "slug": "toto-aftersale",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/toto-icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/toto-splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/toto-adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.kingkodomo.pkmobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "description": ""
+  }
+}

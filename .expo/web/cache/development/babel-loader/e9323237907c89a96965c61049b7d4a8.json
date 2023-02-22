@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default } from \"./CheckPart\";","map":{"version":3,"names":["default"],"sources":["D:/Dev/after-sale-mobile/src/views/CheckPart/index.ts"],"sourcesContent":["export {default} from './CheckPart';"],"mappings":"AAAA,SAAQA,OAAR"},"metadata":{},"sourceType":"module"}

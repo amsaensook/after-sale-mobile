@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default } from \"./SplitPart\";","map":{"version":3,"names":["default"],"sources":["D:/Dev/after-sale-mobile/src/views/SplitPart/index.ts"],"sourcesContent":["export {default} from './SplitPart';"],"mappings":"AAAA,SAAQA,OAAR"},"metadata":{},"sourceType":"module"}

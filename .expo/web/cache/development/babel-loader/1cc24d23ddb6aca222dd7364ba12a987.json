@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default } from \"./Error404\";","map":{"version":3,"names":["default"],"sources":["D:/Dev/after-sale-mobile/src/views/Error404/index.tsx"],"sourcesContent":["export {default} from './Error404';"],"mappings":"AAAA,SAAQA,OAAR"},"metadata":{},"sourceType":"module"}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default } from \"./Menu\";","map":{"version":3,"names":["default"],"sources":["D:/Dev/after-sale-mobile/src/views/Menu/index.ts"],"sourcesContent":["export {default} from './Menu';"],"mappings":"AAAA,SAAQA,OAAR"},"metadata":{},"sourceType":"module"}
