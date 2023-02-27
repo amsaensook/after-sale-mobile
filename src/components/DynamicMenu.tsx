@@ -6,6 +6,8 @@ import CountStock from "../views/CountStock";
 import SplitPart from "../views/SplitPart";
 import ReceiveSaleService from "../views/ReceiveSaleService";
 import RequestSaleService from "../views/RequestSaleService";
+import Issue from "../views/Issue";
+
 
 export const DynamicMenu: any = {
   ReceivePartMobile: ReceivePart,
@@ -16,6 +18,7 @@ export const DynamicMenu: any = {
   SplitPartMobile: SplitPart,
   ReceiveSaleServiceMobile: ReceiveSaleService,
   RequestSaleServiceMobile: RequestSaleService,
+  Issue: Issue,
 };
 
 // Note : set menu name to dynamic menu

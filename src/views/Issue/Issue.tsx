@@ -11,15 +11,15 @@ import AppScanner from '../../components/AppScanner';
 import AppAlert from '../../components/AppAlert';
 
 import {
-  useRequestSaleService,
-  useRequestSaleServiceItem,
-  useExecRequestSaleServiceTransactions,
-  useUpdateRequestSaleService,
-} from '../../hooks/useRequestSaleService';
+  useIssue,
+  useIssueItem,
+  useExecIssueTransactions,
+  useUpdateIssue,
+} from '../../hooks/useIssue';
 
 import { styles } from '../styles';
 
-const RequestSaleService: React.FC = () => {
+const Issue: React.FC = () => {
   const initOrder = { Withdraw_ID: '' };
   const initItem = { QR_NO: '', Tag_ID: '' };
   const initErrors = {};
@@ -38,13 +38,13 @@ const RequestSaleService: React.FC = () => {
   const refInput = useRef<any>(null);
   const refScanner = useRef<boolean>(false);
 
-  const { isLoading: orderIsLoading, isFetching, isError, data: orderData, refetch: orderRefetch, status, error } = useRequestSaleService();
+  const { isLoading: orderIsLoading, isFetching, isError, data: orderData, refetch: orderRefetch, status, error } = useIssue();
 
   const {
     isLoading: itemIsLoading,
     data: itemData,
     refetch: itemRefetch,
-  } = useRequestSaleServiceItem({
+  } = useIssueItem({
     Withdraw_ID: order?.Withdraw_ID || '',
   });
 
@@ -55,7 +55,7 @@ const RequestSaleService: React.FC = () => {
     error: transError,
     mutate: transMutate,
     data: transData,
-  } = useExecRequestSaleServiceTransactions();
+  } = useExecIssueTransactions();
 
   const {
     isLoading: updateIsLoading,
@@ -64,7 +64,7 @@ const RequestSaleService: React.FC = () => {
     error: updateError,
     mutate: updateMutate,
     data: updateData,
-  } = useUpdateRequestSaleService();
+  } = useUpdateIssue();
 
   const handleChangeOrder = (value: string) => {
     if (!value) {
@@ -338,4 +338,4 @@ const RequestSaleService: React.FC = () => {
   );
 };
 
-export default RequestSaleService;
+export default Issue;
