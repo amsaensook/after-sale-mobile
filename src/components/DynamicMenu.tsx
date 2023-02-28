@@ -18,7 +18,7 @@ export const DynamicMenu: any = {
   SplitPartMobile: SplitPart,
   ReceiveSaleServiceMobile: ReceiveSaleService,
   RequestSaleServiceMobile: RequestSaleService,
-  Issue: Issue,
+  IssueMobile: Issue,
 };
 
 // Note : set menu name to dynamic menu

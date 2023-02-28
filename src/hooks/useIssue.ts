@@ -3,7 +3,7 @@ import { httpClient } from "../services/axios";
 
 export const useIssue = () => {
   const getIssue = async () => {
-    return await httpClient.get('/request_sale_service');
+    return await httpClient.get('/issue');
   };
   return useQuery(
     "Issue",
@@ -21,7 +21,7 @@ export const useIssueItem = ({Withdraw_ID}: any) => {
 
   const getIssueItem = async (Withdraw_ID: any) => {
     
-    return await httpClient.get(`/request_sale_service_item?Withdraw_ID=${Withdraw_ID}`);
+    return await httpClient.get(`/issue_item?Withdraw_ID=${Withdraw_ID}`);
   };
   return useQuery<any, any, any>(
     ["IssueItem", Withdraw_ID],
@@ -43,7 +43,7 @@ export const useExecIssueTransactions = () => {
       data.append(value, params[value] || "");
     });
 
-    return await httpClient.post("/exec_request_sale_service_transaction", data);
+    return await httpClient.post("/exec_issue_transaction", data);
   };
 
   return useMutation<any, any, any>(
@@ -75,7 +75,7 @@ export const useUpdateIssue = () => {
       data.append(value, params[value] || "");
     });
 
-    return await httpClient.post("/update_request_sale_service", data);
+    return await httpClient.post("/update_issue", data);
   };
 
   return useMutation<any, any, any>(

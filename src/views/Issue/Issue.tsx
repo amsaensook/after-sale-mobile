@@ -240,7 +240,7 @@ const Issue: React.FC = () => {
                   size={20}
                   width={'100%'}
                   accessibilityLabel="Choose Service"
-                  placeholder="REQUEST ORDER NO."
+                  placeholder="QUOTATION NO."
                   selectedValue={order?.Withdraw_ID || ''}
                   onValueChange={(value) => handleChangeOrder(value)}
                 >
