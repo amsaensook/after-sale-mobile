@@ -9,6 +9,8 @@ import { getDataFromQR } from '../../utils/qr';
 import LoadingScreen from '../../components/LoadingScreen';
 import AppScanner from '../../components/AppScanner';
 import AppAlert from '../../components/AppAlert';
+import { useSelector } from "react-redux";
+import { setAuth, selectAuth } from "../../contexts/slices/authSlice";
 
 import {
   useIssue,
@@ -20,9 +22,16 @@ import {
 import { styles } from '../styles';
 
 const Issue: React.FC = () => {
+
+  const { authResult } = useSelector(selectAuth);
+  const locationTeam = authResult.data.Group_Name;
+  console.log('locationTeam',locationTeam);
+
+
   const initOrder = { Withdraw_ID: '' };
   const initItem = { QR_NO: '', Tag_ID: '' };
   const initErrors = {};
+
 
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -67,6 +76,7 @@ const Issue: React.FC = () => {
   } = useUpdateIssue();
 
   const handleChangeOrder = (value: string) => {
+    console.log('fuck =',value);
     if (!value) {
       return;
     }
@@ -245,7 +255,9 @@ const Issue: React.FC = () => {
                   onValueChange={(value) => handleChangeOrder(value)}
                 >
                   {orderData?.data?.data?.map((value: any) => {
-                    return <Select.Item key={value.Withdraw_ID} shadow={2} label={value.Withdraw_No} value={value.Withdraw_ID} />;
+                    return <Select.Item key={value.Withdraw_ID} 
+                                        shadow={2} label={value.Quotation_No + '-' + value.Customer_Name} 
+                                        value={value.Withdraw_No+ "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
                   })}
                 </Select>
                 {'Withdraw_ID' in errors && <FormControl.ErrorMessage>{errors.Withdraw_ID}</FormControl.ErrorMessage>}
