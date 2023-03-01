@@ -4,8 +4,8 @@ export const styles = StyleSheet.create({
     table_title_10:{
         maxWidth: '10%'
     },
-    table_title_12:{
-        maxWidth: '12%'
+    table_title_28:{
+        maxWidth: '28%'
     },
     table_title_54:{
         maxWidth: '54%'

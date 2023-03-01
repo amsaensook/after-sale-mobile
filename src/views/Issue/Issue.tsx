@@ -325,7 +325,7 @@ const Issue: React.FC = () => {
                 <TouchableOpacity activeOpacity={1}>
                   <DataTable>
                     <DataTable.Header>
-                      <DataTable.Title style={styles.table_title_20}>
+                      <DataTable.Title style={styles.table_title_28}>
                         <Text bold>QR CODE</Text>
                       </DataTable.Title>
                       <DataTable.Title style={styles.table_title_54}>
@@ -338,23 +338,27 @@ const Issue: React.FC = () => {
                         <Text bold>STATUS</Text>
                       </DataTable.Title>
                     </DataTable.Header>
-                    {itemData?.data?.data?.map((value: any, key: number) => {
+                    {itemData?.data?.data?.map((value: any, key: number, color: any, text1: any) => {
+                      {
+                        if (value.Status == "0") {
+                          color = "red.400";
+                          text1 = "Wait";
+                        } else if (value.Status == "1") {
+                          color = "green.400";
+                          text1 = "Scan";
+                        } else {
+                          color = "warning";
+                        }
+                      }
                       return (
                         <DataTable.Row key={key}>
-                          <DataTable.Title style={styles.table_title_20}>{value.No}</DataTable.Title>
-                          <DataTable.Cell style={styles.table_title_54}>{value.Part}</DataTable.Cell>
-                          <DataTable.Cell numeric style={styles.table_title_18}>{value.Request}
-                            {/* <Text bold color={'red.400'}>
-                              {value.Request}
-                            </Text> */}
-                           
-                            
-
-                          </DataTable.Cell>
+                          <DataTable.Title style={styles.table_title_28}>{value.QR_NO}</DataTable.Title>
+                          <DataTable.Cell style={styles.table_title_54}>{value.ITEM_CODE}</DataTable.Cell>
+                          <DataTable.Cell numeric style={styles.table_title_18}>{value.Qty}</DataTable.Cell>
                           <DataTable.Cell numeric style={styles.table_title_18}>
-                          <Tag color={'red.400'} >
-                              {value.Request}
-                          </Tag>
+                          <Text bold color={color}>
+                              {text1}
+                           </Text>
                           </DataTable.Cell>
                         </DataTable.Row>
                       );
