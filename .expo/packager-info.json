@@ -1,10 +1,10 @@
 {
   "webpackServerPort": null,
-  "expoServerPort": null,
+  "expoServerPort": 19000,
   "devToolsPort": 19002,
   "packagerPort": 19000,
   "expoServerNgrokUrl": "https://fv-jhh.maisarayoot.after-sale-mobile.exp.direct",
   "packagerNgrokUrl": "https://fv-jhh.maisarayoot.after-sale-mobile.exp.direct",
-  "ngrokPid": 5628,
+  "ngrokPid": 14696,
   "packagerPid": null
 }

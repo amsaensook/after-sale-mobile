@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from 'react-query';
 import { TouchableWithoutFeedback, Keyboard, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
-import { Box, Input, Select, Icon, VStack, Button, useToast, FormControl, Text } from 'native-base';
+import { Box, Input, Select, Icon, VStack, Button, useToast, FormControl, Text, Tag } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DataTable } from 'react-native-paper';
 
@@ -24,8 +24,8 @@ import { styles } from '../styles';
 const Issue: React.FC = () => {
 
   const { authResult } = useSelector(selectAuth);
-  const locationTeam = authResult.data.Group_Name;
-  console.log('locationTeam',locationTeam);
+  const locationTeam = authResult.data.GroupName;
+  console.log('locationTeam2',locationTeam);
 
 
   const initOrder = { Withdraw_ID: '' };
@@ -77,13 +77,19 @@ const Issue: React.FC = () => {
 
   const handleChangeOrder = (value: string) => {
     console.log('fuck =',value);
-    if (!value) {
+    if (!value || value == undefined) {
       return;
+    }else{
+      clearState('Error');
+      const data = value.split("|");
+      setOrder({ ...order, Withdraw_ID: data[0] });
+      
+
+      // getQuotationItem(data[0]);
     }
 
-    clearState('Error');
+    
 
-    setOrder({ ...order, Withdraw_ID: value });
   };
 
   const handleScanner = (value: any) => {
@@ -156,6 +162,7 @@ const Issue: React.FC = () => {
   };
 
   const clearState = (type: string) => {
+    console.log('type =',type);
     if (type === 'All') {
       setOrder(initOrder);
       setItem(initItem);
@@ -245,11 +252,13 @@ const Issue: React.FC = () => {
             <LoadingScreen show={updateIsLoading || transIsLoading} />
             <VStack space={10} p={5}>
               <FormControl isRequired isInvalid={'Withdraw_ID' in errors}>
+              {
+                locationTeam === 'Administrator' ?
                 <Select
                   h={50}
                   size={20}
                   width={'100%'}
-                  accessibilityLabel="Choose Service"
+                  accessibilityLabel="Choose Quotation"
                   placeholder="QUOTATION NO."
                   selectedValue={order?.Withdraw_ID || ''}
                   onValueChange={(value) => handleChangeOrder(value)}
@@ -257,9 +266,29 @@ const Issue: React.FC = () => {
                   {orderData?.data?.data?.map((value: any) => {
                     return <Select.Item key={value.Withdraw_ID} 
                                         shadow={2} label={value.Quotation_No + '-' + value.Customer_Name} 
-                                        value={value.Withdraw_No+ "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
+                                        value={value.Withdraw_ID + "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
                   })}
                 </Select>
+                : <Select
+                      h={50}
+                      size={20}
+                      width={'100%'}
+                      accessibilityLabel="Choose Quotation"
+                      placeholder="QUOTATION NO."
+                      selectedValue={order?.Withdraw_ID || ''}
+                      onValueChange={(value) => handleChangeOrder(value)}
+                    >
+                       {orderData?.data?.data.filter(
+                        (value: any) => 
+                        value.Location === locationTeam
+                        )
+                        .map((value: any) => {
+                        return <Select.Item key={value.Withdraw_ID} 
+                                            shadow={2} label={value.Quotation_No + '-' + value.Customer_Name} 
+                                            value={value.Withdraw_ID + "|" + value.Withdraw_No+ "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
+                      })}
+                    </Select>
+                  }
                 {'Withdraw_ID' in errors && <FormControl.ErrorMessage>{errors.Withdraw_ID}</FormControl.ErrorMessage>}
               </FormControl>
               <FormControl isRequired isInvalid={'QR_NO' in errors}>
@@ -296,31 +325,36 @@ const Issue: React.FC = () => {
                 <TouchableOpacity activeOpacity={1}>
                   <DataTable>
                     <DataTable.Header>
-                      <DataTable.Title style={styles.table_title_10}>
-                        <Text bold>NO.</Text>
+                      <DataTable.Title style={styles.table_title_20}>
+                        <Text bold>QR CODE</Text>
                       </DataTable.Title>
                       <DataTable.Title style={styles.table_title_54}>
                         <Text bold>PART</Text>
                       </DataTable.Title>
                       <DataTable.Title numeric style={styles.table_title_18}>
-                        <Text bold>REQUEST</Text>
+                        <Text bold>QTY</Text>
                       </DataTable.Title>
                       <DataTable.Title numeric style={styles.table_title_18}>
-                        <Text bold>TOTAL</Text>
+                        <Text bold>STATUS</Text>
                       </DataTable.Title>
                     </DataTable.Header>
                     {itemData?.data?.data?.map((value: any, key: number) => {
                       return (
                         <DataTable.Row key={key}>
-                          <DataTable.Title style={styles.table_title_10}>{value.No}</DataTable.Title>
+                          <DataTable.Title style={styles.table_title_20}>{value.No}</DataTable.Title>
                           <DataTable.Cell style={styles.table_title_54}>{value.Part}</DataTable.Cell>
-                          <DataTable.Cell numeric style={styles.table_title_18}>
-                            <Text bold color={'red.400'}>
+                          <DataTable.Cell numeric style={styles.table_title_18}>{value.Request}
+                            {/* <Text bold color={'red.400'}>
                               {value.Request}
-                            </Text>
+                            </Text> */}
+                           
+                            
+
                           </DataTable.Cell>
                           <DataTable.Cell numeric style={styles.table_title_18}>
-                            {value.Total}
+                          <Tag color={'red.400'} >
+                              {value.Request}
+                          </Tag>
                           </DataTable.Cell>
                         </DataTable.Row>
                       );
