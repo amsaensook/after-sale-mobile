@@ -8,7 +8,6 @@ import Main from "./src/views/Main/Main";
 const App: React.FC = () => {
 
   const NetInfo = useNetInfo();
-
   return (
     <AppContainer>
       <AppConnection isOpenTop={NetInfo.isConnected ? false : true} />

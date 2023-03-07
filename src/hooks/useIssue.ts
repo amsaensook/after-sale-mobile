@@ -17,17 +17,27 @@ export const useIssue = () => {
   );
 };
 
-export const useIssueItem = ({Withdraw_ID}: any) => {
+export const useIssueItem = () => {
 
   const getIssueItem = async (Withdraw_ID: any) => {
     
     return await httpClient.get(`/issue_item?Withdraw_ID=${Withdraw_ID}`);
   };
-  return useQuery<any, any, any>(
-    ["IssueItem", Withdraw_ID],
-    () => getIssueItem(Withdraw_ID),
+  return useMutation<any, any, any>(
+    
+    "IssueItem",
+    (Withdraw_ID) => getIssueItem(Withdraw_ID),
     {
-      enabled: true,
+      onSuccess: (response) => {
+
+        // queryClient.invalidateQueries('Issue');
+
+      },
+      onError: (error) => {
+
+        console.log(error);
+
+      },
     }
   );
 };
@@ -94,4 +104,72 @@ export const useUpdateIssue = () => {
       },
     }
   );
+};
+
+
+export const useCreateIssue = () => {
+
+  const queryClient = useQueryClient();
+
+  const createIssue = async (params: any): Promise<any> => {
+    
+    let data:any = new FormData();
+      data.append('Quotation_No',params.Quotation_No || "");
+      data.append('Item',JSON.stringify(params.Item) || "");
+    console.log('params =',params);
+    console.log('data =',data);
+    return await httpClient.post("/create_issue", data);
+  };
+
+  
+
+  return useMutation<any, any, any>(
+    "CreateIssue",
+    (params) => createIssue(params),
+    {
+      onSuccess: (response) => {
+
+        queryClient.invalidateQueries('Issue');
+      
+      },
+      onError: (error) => {
+
+        console.log(error);
+
+      },
+    }
+  );
+};
+
+
+export const useStockBalQrCode = () => {
+  const queryClient = useQueryClient();
+  const getStockBalQrCode = async (params: any): Promise<any> => {
+
+    let data:any = new FormData();
+      Object.keys(params).forEach((value) => {
+        data.append(value, params[value] || "");
+      });
+
+      
+      return await httpClient.post("/stock_bal", data);
+  };
+
+
+  return useMutation<any, any, any>(
+    "getStockBalQrCode",
+    (params) => getStockBalQrCode(params),
+    {
+      onSuccess: (response) => {
+
+        queryClient.invalidateQueries('Issue');
+
+      },
+      onError: (error) => {
+
+        console.log(error);
+
+      },
+    }
+  ); 
 };

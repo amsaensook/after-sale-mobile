@@ -22,7 +22,7 @@ import Logo from "../../assets/toto.svg";
 
 const Login: React.FC = () => {
   const toast = useToast();
-
+  console.log('LOGINNNNN');
   const {
     control,
     handleSubmit,
@@ -35,6 +35,9 @@ const Login: React.FC = () => {
   const onSubmit: SubmitHandler<IAuthLoginParams> = useCallback((data) => {
     mutate(data);
   },[]);
+
+
+  console.log('status',status);
 
   useEffect(() => {
     if (status === "success") {

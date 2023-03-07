@@ -1,14 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useQueryClient } from 'react-query';
-import { TouchableWithoutFeedback, Keyboard, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
-import { Box, Input, Select, Icon, VStack, Button, useToast, FormControl, Text, Tag } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
-import { DataTable } from 'react-native-paper';
+import React, { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "react-query";
+import {
+  TouchableWithoutFeedback,
+  Keyboard,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import {
+  Box,
+  Input,
+  Select,
+  Icon,
+  VStack,
+  Button,
+  useToast,
+  FormControl,
+  Text,
+  Tag,
+} from "native-base";
+import { MaterialIcons } from "@expo/vector-icons";
+import { DataTable } from "react-native-paper";
 
-import { getDataFromQR } from '../../utils/qr';
-import LoadingScreen from '../../components/LoadingScreen';
-import AppScanner from '../../components/AppScanner';
-import AppAlert from '../../components/AppAlert';
+import { getDataFromQR } from "../../utils/qr";
+import LoadingScreen from "../../components/LoadingScreen";
+import AppScanner from "../../components/AppScanner";
+import AppAlert from "../../components/AppAlert";
 import { useSelector } from "react-redux";
 import { setAuth, selectAuth } from "../../contexts/slices/authSlice";
 
@@ -17,21 +34,23 @@ import {
   useIssueItem,
   useExecIssueTransactions,
   useUpdateIssue,
-} from '../../hooks/useIssue';
+  useCreateIssue,
+  useStockBalQrCode,
+} from "../../hooks/useIssue";
 
-import { styles } from '../styles';
+import { styles } from "../styles";
 
 const Issue: React.FC = () => {
-
   const { authResult } = useSelector(selectAuth);
   const locationTeam = authResult.data.GroupName;
-  console.log('locationTeam2',locationTeam);
+  const permissionPass = authResult.data.permission.filter(
+    (item: any) => item.MenuId === "IssueMobile"
+  );
 
-
-  const initOrder = { Withdraw_ID: '' };
-  const initItem = { QR_NO: '', Tag_ID: '' };
+  const initOrder = { Withdraw_ID: "" };
+  const initOrderQuo = { Quotation_No: "" };
+  const initItem = { QR_NO: "", Tag_ID: "" };
   const initErrors = {};
-
 
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -39,23 +58,56 @@ const Issue: React.FC = () => {
   const [camera, setCamera] = useState<boolean>(false);
 
   const [order, setOrder] = useState<any>(initOrder);
+  const [orderQuo, setOrderQuo] = useState<any>(initOrderQuo);
   const [item, setItem] = useState<any>(initItem);
   const [errors, setErrors] = useState<any>(initErrors);
 
   const [disabledButton, setDisabledButton] = useState<boolean>(true);
-
+  const [dataSource, setDataSource] = useState<any>([]);
   const refInput = useRef<any>(null);
   const refScanner = useRef<boolean>(false);
+  const [dataLocation, setLocation] = useState<any>(null);
+  const [dataQuotation, setQuotation] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const { isLoading: orderIsLoading, isFetching, isError, data: orderData, refetch: orderRefetch, status, error } = useIssue();
+  const {
+    isLoading: orderIsLoading,
+    isFetching,
+    isError,
+    data: orderData,
+    refetch: orderRefetch,
+    status,
+    error,
+  } = useIssue();
 
   const {
     isLoading: itemIsLoading,
     data: itemData,
-    refetch: itemRefetch,
-  } = useIssueItem({
-    Withdraw_ID: order?.Withdraw_ID || '',
-  });
+    status: itemstatus,
+    error: itemsError,
+    mutate: getQuotationItem,
+  } = useIssueItem();
+
+  useEffect(() => {
+    if (itemstatus === "success") {
+      if (!itemData?.data || itemData?.data?.data?.length <= 0) {
+        setDataSource([]);
+      } else {
+        setDataSource(itemData?.data.data);
+      }
+    } else if (itemsError === "error") {
+      toast.show({
+        render: () => (
+          <AppAlert
+            text={itemsError?.response?.data?.message || "error"}
+            type="error"
+          />
+        ),
+        placement: "top",
+        duration: 3000,
+      });
+    }
+  }, [itemstatus]);
 
   const {
     isLoading: transIsLoading,
@@ -75,31 +127,56 @@ const Issue: React.FC = () => {
     data: updateData,
   } = useUpdateIssue();
 
+  const {
+    isLoading: createIsLoadingIssue,
+    isError: createIsErrorIssue,
+    error: createErrorIssue,
+    status: createStatusIssue,
+    mutate: createMutateIssue,
+    data: createDataIssue,
+  } = useCreateIssue();
+
+  const {
+    isLoading: StockBalQrCodeIsLoading,
+    isError: StockBalQrCodeIsError,
+    data: StockBalQrCode,
+    status: StockBalQrCodeStatus,
+    error: StockBalQrCodeError,
+    mutate: getStockBalQrCode,
+  } = useStockBalQrCode();
+
+  useEffect(() => {
+    if (!dataSource || dataSource.length <= 0) {
+      console.log("ไม่มี DATA");
+    } else {
+      handleCheckScan();
+    }
+  }, [dataSource]);
+
   const handleChangeOrder = (value: string) => {
-    console.log('fuck =',value);
+    setLocation(null);
+    setQuotation(null);
     if (!value || value == undefined) {
       return;
-    }else{
-      clearState('Error');
+    } else {
+      clearState("Error");
       const data = value.split("|");
       setOrder({ ...order, Withdraw_ID: data[0] });
-      
-
-      // getQuotationItem(data[0]);
+      setOrderQuo({ ...orderQuo, Quotation_No: value });
+      getQuotationItem(data[0]);
+      setLocation(data[2]);
+      setQuotation(data[4]);
     }
-
-    
-
   };
+
 
   const handleScanner = (value: any) => {
     setCamera(false);
-
     if (!value) {
       return;
     }
 
-    clearState('Error');
+    clearState("Error");
 
     const qr = getDataFromQR(value);
 
@@ -111,50 +188,268 @@ const Issue: React.FC = () => {
     });
 
     refScanner.current = true;
+    
   };
+
+
+  useEffect(() => {
+    if (refScanner.current && validateErrors()) {
+      setLoading(true);
+      if (permissionPass[0].Approved2 == 1) {
+        //ยิงข้ามได้ สิทธิ์สูงsd
+        let _dataSource = [...dataSource];
+        const search = (sss: any) => sss.QR_NO === item.QR_NO;
+
+        const indexFind = _dataSource.findIndex(search);
+        if (indexFind === -1) {
+          //ไม่มี QR Code นี้ แต่สามารถเพิ่มได้
+
+          getStockBalQrCode({ QR_NO: item.QR_NO, Location_ID: dataLocation });
+        } else {
+          getStockBalQrCode({ QR_NO: item.QR_NO, Location_ID: dataLocation });
+        }
+      } else {
+        let _dataSource = [...dataSource];
+
+        const search = (sss: any) => sss.QR_NO === item.QR_NO;
+
+        const indexFind = _dataSource.findIndex(search);
+
+        if (indexFind === -1) {
+          //ไม่มี QR Code นี้
+          toast.show({
+            render: () => (
+              <AppAlert
+                text={`QR Code นี้ ไม่อยู่ใน Quotation นี้` || "error"}
+                type="error"
+              />
+            ),
+            placement: "top",
+            duration: 3000,
+          });
+          setLoading(false);
+        } else {
+          const newData = [...dataSource];
+          const item = newData[indexFind];
+
+          const new_value = {
+            Withdraw_No: item.Withdraw_No,
+            QR_NO: item.QR_NO,
+            ITEM_ID: item.ITEM_ID,
+            ITEM_CODE: item.ITEM_CODE,
+            ITEM_DESCRIPTION: item.ITEM_DESCRIPTION,
+            Product_ID: item.Product_ID,
+            Product_DESCRIPTION: item.Product_DESCRIPTION,
+            Qty: item.Qty,
+            Bal_QTY: item.Bal_QTY,
+            ReserveQTY: item.ReserveQTY,
+            LOT: item.LOT,
+            Status: 1,
+            Location_ID: item.Location_ID,
+          };
+
+          newData.splice(indexFind, 1, {
+            ...item,
+            ...new_value,
+          });
+          setDataSource(newData);
+          toast.show({
+            render: () => (
+              <AppAlert text={`Scan เรียบร้อย` || "success"} type="success" />
+            ),
+            placement: "top",
+            duration: 2000,
+          });
+          setLoading(false);
+        }
+      }
+    }
+  }, [item]);
+
+  useEffect(() => {
+    if (StockBalQrCodeStatus === "success") {
+      if (!StockBalQrCode?.data || StockBalQrCode?.data?.data?.length <= 0) {
+        toast.show({
+          render: () => (
+            <AppAlert
+              text={`ไม่มีของใน stock หรืออยู่คนละ Team` || "error"}
+              type="error"
+            />
+          ),
+          placement: "top",
+          duration: 2000,
+        });
+        setLoading(false);
+      } else {
+        let _dataSource = [...dataSource];
+
+        const search = (sss: any) =>
+          sss.QR_NO === StockBalQrCode?.data?.data[0].QR_NO;
+
+        const indexFind = _dataSource.findIndex(search);
+
+        if (indexFind === -1) {
+          //ไม่มี QR Code นี้ แต่สามารถเพิ่มได้ เนื่องจากมีสิทธิ์
+          const new_value1 = {
+            Withdraw_No: StockBalQrCode?.data?.data[0].Withdraw_No,
+            QR_NO: StockBalQrCode?.data?.data[0].QR_NO,
+            ITEM_ID: StockBalQrCode?.data?.data[0].ITEM_ID,
+            ITEM_CODE: StockBalQrCode?.data?.data[0].ITEM_CODE,
+            ITEM_DESCRIPTION: StockBalQrCode?.data?.data[0].ITEM_DESCRIPTION,
+            Product_ID: StockBalQrCode?.data?.data[0].Product_ID,
+            Product_DESCRIPTION:
+              StockBalQrCode?.data?.data[0].Product_DESCRIPTION,
+            Qty: StockBalQrCode?.data?.data[0].Qty,
+            Bal_QTY: StockBalQrCode?.data?.data[0].Bal_QTY,
+            ReserveQTY: StockBalQrCode?.data?.data[0].ReserveQTY,
+            LOT: StockBalQrCode?.data?.data[0].LOT,
+            Status: 1,
+            Location_ID: StockBalQrCode?.data?.data[0].Location_ID,
+          };
+          _dataSource.push(new_value1);
+          setDataSource(_dataSource);
+          toast.show({
+            render: () => (
+              <AppAlert text={`Scan เรียบร้อย` || "success"} type="success" />
+            ),
+            placement: "top",
+            duration: 2000,
+          });
+          setLoading(false);
+        } else {
+          //ถ้าไม่มีสิทธิ์ scan ได้อย่างเดียว
+          const newData = [...dataSource];
+          const item = newData[indexFind];
+
+          const new_value = {
+            Withdraw_No: item.Withdraw_No,
+            QR_NO: item.QR_NO,
+            ITEM_ID: item.ITEM_ID,
+            ITEM_CODE: item.ITEM_CODE,
+            ITEM_DESCRIPTION: item.ITEM_DESCRIPTION,
+            Product_ID: item.Product_ID,
+            Product_DESCRIPTION: item.Product_DESCRIPTION,
+            Qty: item.Qty,
+            Bal_QTY: item.Bal_QTY,
+            ReserveQTY: item.ReserveQTY,
+            LOT: item.LOT,
+            Status: 1,
+            Location_ID: item.Location_ID,
+          };
+
+          newData.splice(indexFind, 1, {
+            ...item,
+            ...new_value,
+          });
+          setDataSource(newData);
+          toast.show({
+            render: () => (
+              <AppAlert text={`Scan เรียบร้อย` || "success"} type="success" />
+            ),
+            placement: "top",
+            duration: 2000,
+          });
+          setLoading(false);
+        }
+      }
+    } else if (StockBalQrCodeStatus === "error") {
+      toast.show({
+        render: () => (
+          <AppAlert
+            text={StockBalQrCodeError?.response?.data?.message || "error"}
+            type="error"
+          />
+        ),
+        placement: "top",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  }, [StockBalQrCodeStatus]);
 
   const handleSubmit = () => {
-    updateMutate(order);
+    var newData = dataSource.filter(function (element: any) {
+      return element.Status == 1;
+    });
+     
+      setLoading(true);
+      createMutateIssue({ Quotation_No: dataQuotation,Item: newData });
+    
   };
 
-  const calculateTotal = () => {
-    const sumRequest =
-      itemData?.data?.data?.reduce((previousValue: any, currentValue: any) => {
-        return previousValue + parseInt(currentValue.Request);
-      }, 0) || 0;
+  useEffect(() => {
+    if (createStatusIssue === "success") {
+      toast.show({
+        render: () => (
+          <AppAlert
+            text={createDataIssue?.data?.message || "success"}
+            type="success"
+          />
+        ),
+        placement: "top",
+        duration: 2000,
+      });
+      setDataSource([]);
+      clearState("All");
+      setLoading(false);
+    } else if (createStatusIssue === "error") {
+      toast.show({
+        render: () => (
+          <AppAlert
+            text={createErrorIssue?.response?.data?.message || "error"}
+            type="error"
+          />
+        ),
+        placement: "top",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  }, [createStatusIssue]);
 
-    const sumTotal =
-      itemData?.data?.data?.reduce((previousValue: any, currentValue: any) => {
-        return previousValue + parseInt(currentValue.Total);
-      }, 0) || 0;
+  useEffect(() => {
+    return () => {
+      clearState("All");
+      queryClient.clear();
+    };
+  }, []);
 
-    if (parseInt(sumRequest) === parseInt(sumTotal) && parseInt(sumRequest) !== 0) {
+  const handleCheckScan = () => {
+    var countfiltered = dataSource.filter(function (element: any) {
+      return element.Status == 1;
+    }).length;
+
+    if (countfiltered > 0) {
       setDisabledButton(false);
+    } else {
+      setDisabledButton(true);
     }
   };
 
   const validateErrors = () => {
     refScanner.current = false;
-
     if (!order.Withdraw_ID) {
-      setErrors({ ...errors, Withdraw_ID: 'Receive Order is required' });
-      clearState('Item');
+      setErrors({ ...errors, Withdraw_ID: "Quotation No is required" });
+      clearState("Item");
       return false;
     }
 
     if (
       itemData.data.data.filter((value: any) => {
-        return parseInt(value.Item_ID) === parseInt(item.Item_ID) && parseInt(value.Request) === parseInt(value.Total);
+        return (
+          parseInt(value.Item_ID) === parseInt(item.Item_ID) &&
+          parseInt(value.Request) === parseInt(value.Total)
+        );
       }).length > 0
     ) {
-      setErrors({ ...errors, QR_NO: 'This Item Request Completed' });
-      clearState('Item');
+      setErrors({ ...errors, QR_NO: "This Item Request Completed" });
+      clearState("Item");
       return false;
     }
 
     if (!item.QR_NO || !item.Tag_ID) {
-      setErrors({ ...errors, QR_NO: 'Invalid QR format' });
-      clearState('Item');
+      setErrors({ ...errors, QR_NO: "Invalid QR format" });
+      clearState("Item");
       return false;
     }
 
@@ -162,15 +457,15 @@ const Issue: React.FC = () => {
   };
 
   const clearState = (type: string) => {
-    console.log('type =',type);
-    if (type === 'All') {
+    if (type === "All") {
       setOrder(initOrder);
+      setOrderQuo(initOrderQuo);
       setItem(initItem);
       setErrors(initErrors);
       setDisabledButton(true);
-    } else if (type === 'Item') {
+    } else if (type === "Item") {
       setItem(initItem);
-    } else if (type === 'Order') {
+    } else if (type === "Order") {
       setOrder(initOrder);
     } else {
       setErrors(initErrors);
@@ -178,52 +473,62 @@ const Issue: React.FC = () => {
   };
 
   useEffect(() => {
-    itemRefetch();
+
   }, [order]);
 
   useEffect(() => {
-    if (refScanner.current && validateErrors()) {
-      transMutate({ ...order, ...item });
-    }
-  }, [item]);
-
-  useEffect(() => {
-    calculateTotal();
-  }, [itemData]);
-
-  useEffect(() => {
-    if (transStatus === 'success') {
+    if (transStatus === "success") {
       toast.show({
-        render: () => <AppAlert text={transData?.data?.message || 'success'} type="success" />,
-        placement: 'top',
+        render: () => (
+          <AppAlert
+            text={transData?.data?.message || "success"}
+            type="success"
+          />
+        ),
+        placement: "top",
         duration: 2000,
       });
-    } else if (transStatus === 'error') {
+    } else if (transStatus === "error") {
       toast.show({
-        render: () => <AppAlert text={transError?.response?.data?.message || 'error'} type="error" />,
-        placement: 'top',
+        render: () => (
+          <AppAlert
+            text={transError?.response?.data?.message || "error"}
+            type="error"
+          />
+        ),
+        placement: "top",
         duration: 3000,
       });
     }
 
     return () => {
       refScanner.current = false;
-      clearState('Item');
+      clearState("Item");
     };
   }, [transStatus]);
 
   useEffect(() => {
-    if (updateStatus === 'success') {
+    if (updateStatus === "success") {
       toast.show({
-        render: () => <AppAlert text={updateData?.data?.message || 'success'} type="success" />,
-        placement: 'top',
+        render: () => (
+          <AppAlert
+            text={updateData?.data?.message || "success"}
+            type="success"
+          />
+        ),
+        placement: "top",
         duration: 2000,
       });
-      clearState('All');
-    } else if (updateStatus === 'error') {
+      clearState("All");
+    } else if (updateStatus === "error") {
       toast.show({
-        render: () => <AppAlert text={updateError?.response?.data?.message || 'error'} type="error" />,
-        placement: 'top',
+        render: () => (
+          <AppAlert
+            text={updateError?.response?.data?.message || "error"}
+            type="error"
+          />
+        ),
+        placement: "top",
         duration: 3000,
       });
     }
@@ -239,7 +544,7 @@ const Issue: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      clearState('All');
+      clearState("All");
       queryClient.clear();
     };
   }, []);
@@ -249,49 +554,61 @@ const Issue: React.FC = () => {
       {!camera ? (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <Box flex={1}>
-            <LoadingScreen show={updateIsLoading || transIsLoading} />
+            <LoadingScreen show={createIsLoadingIssue || transIsLoading || loading} />
             <VStack space={10} p={5}>
-              <FormControl isRequired isInvalid={'Withdraw_ID' in errors}>
-              {
-                locationTeam === 'Administrator' ?
-                <Select
-                  h={50}
-                  size={20}
-                  width={'100%'}
-                  accessibilityLabel="Choose Quotation"
-                  placeholder="QUOTATION NO."
-                  selectedValue={order?.Withdraw_ID || ''}
-                  onValueChange={(value) => handleChangeOrder(value)}
-                >
-                  {orderData?.data?.data?.map((value: any) => {
-                    return <Select.Item key={value.Withdraw_ID} 
-                                        shadow={2} label={value.Quotation_No + '-' + value.Customer_Name} 
-                                        value={value.Withdraw_ID + "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
-                  })}
-                </Select>
-                : <Select
-                      h={50}
-                      size={20}
-                      width={'100%'}
-                      accessibilityLabel="Choose Quotation"
-                      placeholder="QUOTATION NO."
-                      selectedValue={order?.Withdraw_ID || ''}
-                      onValueChange={(value) => handleChangeOrder(value)}
-                    >
-                       {orderData?.data?.data.filter(
-                        (value: any) => 
-                        value.Location === locationTeam
-                        )
-                        .map((value: any) => {
-                        return <Select.Item key={value.Withdraw_ID} 
-                                            shadow={2} label={value.Quotation_No + '-' + value.Customer_Name} 
-                                            value={value.Withdraw_ID + "|" + value.Withdraw_No+ "|" + value.Location_ID + "|" + value.Location+ "|" + value.Quotation_No} />;
+              <FormControl isRequired isInvalid={"Withdraw_ID" in errors}>
+                {locationTeam === "Administrator" ? (
+                  <Select
+                    h={50}
+                    size={20}
+                    width={"100%"}
+                    accessibilityLabel="Choose Quotation"
+                    placeholder="QUOTATION NO."
+                    selectedValue={orderQuo?.Quotation_No || ""}
+                    onValueChange={(value) => handleChangeOrder(value)}
+                  >
+                    {orderData?.data?.data?.map((value: any) => {
+                      return (
+                        <Select.Item
+                          key={value.QuotationValue}
+                          shadow={2}
+                          label={value.Quotation_Customer}
+                          value={value.QuotationValue}
+                        />
+                      );
+                    })}
+                  </Select>
+                ) : (
+                  <Select
+                    h={50}
+                    size={20}
+                    width={"100%"}
+                    accessibilityLabel="Choose Quotation"
+                    placeholder="QUOTATION NO."
+                    selectedValue={orderQuo?.Quotation_No || ""}
+                    onValueChange={(value) => handleChangeOrder(value)}
+                  >
+                    {orderData?.data?.data
+                      .filter((value: any) => value.Location === locationTeam)
+                      .map((value: any) => {
+                        return (
+                          <Select.Item
+                            key={value.Withdraw_ID}
+                            shadow={2}
+                            label={value.Quotation_Customer}
+                            value={value.QuotationValue}
+                          />
+                        );
                       })}
-                    </Select>
-                  }
-                {'Withdraw_ID' in errors && <FormControl.ErrorMessage>{errors.Withdraw_ID}</FormControl.ErrorMessage>}
+                  </Select>
+                )}
+                {"Withdraw_ID" in errors && (
+                  <FormControl.ErrorMessage>
+                    {errors.Withdraw_ID}
+                  </FormControl.ErrorMessage>
+                )}
               </FormControl>
-              <FormControl isRequired isInvalid={'QR_NO' in errors}>
+              <FormControl isRequired isInvalid={"QR_NO" in errors}>
                 <Input
                   h={50}
                   size={20}
@@ -301,23 +618,32 @@ const Issue: React.FC = () => {
                   p={2}
                   placeholder="SCAN QR"
                   InputRightElement={
-                    <Icon size={35} color={'primary.600'} as={<MaterialIcons name="qr-code-scanner" />} onPress={() => setCamera(true)} />
+                    <Icon
+                      size={35}
+                      color={"primary.600"}
+                      as={<MaterialIcons name="qr-code-scanner" />}
+                      onPress={() => setCamera(true)}
+                    />
                   }
                   autoFocus
-                  value={item?.QR_NO || ''}
+                  value={item?.QR_NO || ""}
                   onChangeText={(value) => handleScanner(value)}
                 />
-                {'QR_NO' in errors && <FormControl.ErrorMessage>{errors.QR_NO}</FormControl.ErrorMessage>}
+                {"QR_NO" in errors && (
+                  <FormControl.ErrorMessage>
+                    {errors.QR_NO}
+                  </FormControl.ErrorMessage>
+                )}
               </FormControl>
               <ScrollView
                 keyboardShouldPersistTaps="handled"
-                style={{ height: '50%' }}
+                style={{ height: "50%" }}
                 refreshControl={
                   <RefreshControl
                     refreshing={itemIsLoading}
                     onRefresh={async () => {
                       await orderRefetch();
-                      await itemRefetch();
+                      // await itemRefetch();
                     }}
                   />
                 }
@@ -325,7 +651,7 @@ const Issue: React.FC = () => {
                 <TouchableOpacity activeOpacity={1}>
                   <DataTable>
                     <DataTable.Header>
-                      <DataTable.Title style={styles.table_title_28}>
+                      <DataTable.Title style={styles.table_title_30}>
                         <Text bold>QR CODE</Text>
                       </DataTable.Title>
                       <DataTable.Title style={styles.table_title_54}>
@@ -338,31 +664,45 @@ const Issue: React.FC = () => {
                         <Text bold>STATUS</Text>
                       </DataTable.Title>
                     </DataTable.Header>
-                    {itemData?.data?.data?.map((value: any, key: number, color: any, text1: any) => {
-                      {
-                        if (value.Status == "0") {
-                          color = "red.400";
-                          text1 = "Wait";
-                        } else if (value.Status == "1") {
-                          color = "green.400";
-                          text1 = "Scan";
-                        } else {
-                          color = "warning";
+                    {dataSource?.map(
+                      (value: any, key: number, color: any, text1: any) => {
+                        {
+                          if (value.Status == "0") {
+                            color = "red.400";
+                            text1 = "Wait";
+                          } else if (value.Status == "1") {
+                            color = "green.400";
+                            text1 = "Scan";
+                          } else {
+                            color = "warning";
+                          }
                         }
+                        return (
+                          <DataTable.Row key={key}>
+                            <DataTable.Title style={styles.table_title_30}>
+                              {value.QR_NO}
+                            </DataTable.Title>
+                            <DataTable.Title style={styles.table_title_54}>
+                              {value.ITEM_CODE}
+                            </DataTable.Title>
+                            <DataTable.Cell
+                              numeric
+                              style={styles.table_title_18}
+                            >
+                              {value.Qty}
+                            </DataTable.Cell>
+                            <DataTable.Cell
+                              numeric
+                              style={styles.table_title_18}
+                            >
+                              <Text bold color={color}>
+                                {text1}
+                              </Text>
+                            </DataTable.Cell>
+                          </DataTable.Row>
+                        );
                       }
-                      return (
-                        <DataTable.Row key={key}>
-                          <DataTable.Title style={styles.table_title_28}>{value.QR_NO}</DataTable.Title>
-                          <DataTable.Cell style={styles.table_title_54}>{value.ITEM_CODE}</DataTable.Cell>
-                          <DataTable.Cell numeric style={styles.table_title_18}>{value.Qty}</DataTable.Cell>
-                          <DataTable.Cell numeric style={styles.table_title_18}>
-                          <Text bold color={color}>
-                              {text1}
-                           </Text>
-                          </DataTable.Cell>
-                        </DataTable.Row>
-                      );
-                    }) || (
+                    ) || (
                       <DataTable.Row>
                         <DataTable.Title>No Data</DataTable.Title>
                       </DataTable.Row>
@@ -372,7 +712,9 @@ const Issue: React.FC = () => {
               </ScrollView>
               <Button
                 backgroundColor="green.600"
-                leftIcon={<Icon as={<MaterialIcons name="check" />} size="sm" />}
+                leftIcon={
+                  <Icon as={<MaterialIcons name="check" />} size="sm" />
+                }
                 isDisabled={disabledButton}
                 onPress={handleSubmit}
               >

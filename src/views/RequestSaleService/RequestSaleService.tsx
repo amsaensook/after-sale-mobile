@@ -121,7 +121,7 @@ const RequestSaleService: React.FC = () => {
     refScanner.current = false;
 
     if (!order.Withdraw_ID) {
-      setErrors({ ...errors, Withdraw_ID: 'Receive Order is required' });
+      setErrors({ ...errors, Withdraw_ID: 'Request Order is required' });
       clearState('Item');
       return false;
     }
@@ -152,6 +152,7 @@ const RequestSaleService: React.FC = () => {
       setErrors(initErrors);
       setDisabledButton(true);
     } else if (type === 'Item') {
+      console.log('Item ----',initItem);
       setItem(initItem);
     } else if (type === 'Order') {
       setOrder(initOrder);
@@ -191,7 +192,7 @@ const RequestSaleService: React.FC = () => {
 
     return () => {
       refScanner.current = false;
-      clearState('Item');
+      // clearState('Item');
     };
   }, [transStatus]);
 
@@ -245,7 +246,8 @@ const RequestSaleService: React.FC = () => {
                   onValueChange={(value) => handleChangeOrder(value)}
                 >
                   {orderData?.data?.data?.map((value: any) => {
-                    return <Select.Item key={value.Withdraw_ID} shadow={2} label={value.Withdraw_No} value={value.Withdraw_ID} />;
+                    return <Select.Item key={value.Withdraw_ID} shadow={2} 
+                    label={value.Withdraw_No} value={value.Withdraw_ID} />;
                   })}
                 </Select>
                 {'Withdraw_ID' in errors && <FormControl.ErrorMessage>{errors.Withdraw_ID}</FormControl.ErrorMessage>}
@@ -301,7 +303,7 @@ const RequestSaleService: React.FC = () => {
                       return (
                         <DataTable.Row key={key}>
                           <DataTable.Title style={styles.table_title_10}>{value.No}</DataTable.Title>
-                          <DataTable.Cell style={styles.table_title_54}>{value.Part}</DataTable.Cell>
+                          <DataTable.Title style={styles.table_title_54}>{value.Part}</DataTable.Title>
                           <DataTable.Cell numeric style={styles.table_title_18}>
                             <Text bold color={'red.400'}>
                               {value.Request}
