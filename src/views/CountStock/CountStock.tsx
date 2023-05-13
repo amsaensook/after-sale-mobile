@@ -29,6 +29,8 @@ const CountStock: React.FC = () => {
   const [item, setItem] = useState<any>(initItem);
   const [errors, setErrors] = useState<any>(initErrors);
 
+  const [currentItem , setCurrentItem] = useState<string>('')
+
   const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
   const refInput = useRef<any>(null);
@@ -89,6 +91,8 @@ const CountStock: React.FC = () => {
 
       setItem({ ...item, QR_NO: qr?.QR_NO || '', Item_ID: qr?.Item_ID || '' });
 
+      setCurrentItem(qr?.Item_ID || '')
+
       refScanner.current = true;
     },
     [item]
@@ -147,6 +151,7 @@ const CountStock: React.FC = () => {
     if (type === 'All') {
       setOrder(initOrder);
       setItem(initItem);
+      setCurrentItem('');
       setErrors(initErrors);
       setDisabledButton(true);
     } else if (type === 'Item') {
@@ -295,10 +300,26 @@ const CountStock: React.FC = () => {
                         <Text bold>BAL</Text>
                       </DataTable.Title>
                     </DataTable.Header>
-                    {itemData?.data?.data?.map((value: any, key: number) => {
+                    {itemData?.data?.data?.filter((item:any) => item.Item_ID == currentItem).map((value: any, key: number) => {
+                      return (
+                        <DataTable.Row key={key} style={{backgroundColor:'yellow'}}>
+                          <DataTable.Title style={styles.table_title_10}>{key+1}</DataTable.Title>
+                          <DataTable.Cell style={styles.table_title_54}>{value.Item}</DataTable.Cell>
+                          <DataTable.Cell numeric style={styles.table_title_18}>
+                            <Text bold color={'primary.600'}>
+                              {value.Actual}
+                            </Text>
+                          </DataTable.Cell>
+                          <DataTable.Cell numeric style={styles.table_title_18}>
+                            {value.Balance}
+                          </DataTable.Cell>
+                        </DataTable.Row>
+                      );
+                    }) || null}
+                    {itemData?.data?.data?.filter((item:any) => item.Item_ID != currentItem).slice(0, 50).map((value: any, key: number) => {
                       return (
                         <DataTable.Row key={key}>
-                          <DataTable.Title style={styles.table_title_10}>{value.No}</DataTable.Title>
+                          <DataTable.Title style={styles.table_title_10}>{key+(currentItem ? 2 : 1)}</DataTable.Title>
                           <DataTable.Cell style={styles.table_title_54}>{value.Item}</DataTable.Cell>
                           <DataTable.Cell numeric style={styles.table_title_18}>
                             <Text bold color={'primary.600'}>
