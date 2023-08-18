@@ -556,7 +556,7 @@ const Issue: React.FC = () => {
           <Box flex={1}>
             <LoadingScreen show={createIsLoadingIssue || transIsLoading || loading} />
             <VStack space={10} p={5}>
-              <FormControl isRequired isInvalid={"Withdraw_ID" in errors}>
+              <FormControl isRequired isInvalid={"Withdraw_ID" in errors} isReadOnly>
                 {locationTeam === "Administrator" ? (
                   <Select
                     h={50}

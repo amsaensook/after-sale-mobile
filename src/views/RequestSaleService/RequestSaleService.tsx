@@ -86,7 +86,6 @@ const RequestSaleService: React.FC = () => {
     clearState('Error');
 
     const qr = getDataFromQR(value);
-
     setItem({
       ...item,
       QR_NO: qr?.QR_NO || "",
@@ -235,7 +234,7 @@ const RequestSaleService: React.FC = () => {
           <Box flex={1}>
             <LoadingScreen show={updateIsLoading || transIsLoading} />
             <VStack space={10} p={5}>
-              <FormControl isRequired isInvalid={'Withdraw_ID' in errors}>
+              <FormControl isRequired isInvalid={'Withdraw_ID' in errors} isReadOnly>
                 <Select
                   h={50}
                   size={20}

@@ -219,7 +219,7 @@ const ReceiveSaleService: React.FC = () => {
           <Box flex={1}>
             <LoadingScreen show={updateIsLoading || transIsLoading} />
             <VStack space={10} p={5}>
-              <FormControl isRequired isInvalid={'Rec_ID' in errors}>
+              <FormControl isRequired isInvalid={'Rec_ID' in errors} isReadOnly>
                 <Select
                   h={50}
                   size={20}
@@ -230,7 +230,7 @@ const ReceiveSaleService: React.FC = () => {
                   onValueChange={(value) => handleChangeOrder(value)}
                 >
                   {orderData?.data?.data?.map((value: any) => {
-                    return <Select.Item key={value.Rec_ID} shadow={2} label={value.Rec_NO} value={value.Rec_ID} />;
+                    return <Select.Item key={value.Rec_ID} shadow={2} label={value.Rec_NO+' | '+value.Ref_DocNo_4} value={value.Rec_ID} />;
                   })}
                 </Select>
                 {'Rec_ID' in errors && <FormControl.ErrorMessage>{errors.Rec_ID}</FormControl.ErrorMessage>}

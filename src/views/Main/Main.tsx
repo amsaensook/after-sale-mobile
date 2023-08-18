@@ -16,10 +16,13 @@ import { expireTime } from "../../configs/token";
 
 import { DynamicMenu } from "../../components/DynamicMenu";
 import Logo from "../../components/Logo";
+import Login from "../Login";
+import Menu from "../Menu";
+import Error404 from "../Error404";
 
-const Login = React.lazy(() => import("../Login"));
-const Menu = React.lazy(() => import("../Menu"));
-const Error404 = React.lazy(() => import("../Error404"));
+// const Login = React.lazy(() => import("../Login"));
+// const Menu = React.lazy(() => import("../Menu"));
+// const Error404 = React.lazy(() => import("../Error404"));
 
 const Main: React.FC = () => {
   const Stack: any = createStackNavigator();

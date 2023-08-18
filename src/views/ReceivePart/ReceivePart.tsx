@@ -214,7 +214,7 @@ const ReceivePart: React.FC = () => {
           <Box flex={1}>
             <LoadingScreen show={updateIsLoading || transIsLoading} />
             <VStack space={10} p={5}>
-              <FormControl isRequired isInvalid={'Rec_ID' in errors}>
+              <FormControl isRequired isInvalid={'Rec_ID' in errors} isReadOnly>
                 <Select
                   h={50}
                   size={20}

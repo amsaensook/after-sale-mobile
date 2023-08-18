@@ -5,26 +5,24 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "resourceClass": "m1-medium"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "ios": {
-        "resourceClass": "m1-medium"
+      "channel": "preview",
+      "env": {
+        "REACT_APP_API_URL": "http://119.59.105.14/after-sale-api-mobile",
+        "REACT_APP_PLATFORM" : "MA"
       }
     },
     "production": {
+      "channel": "production",
       "android": {
         "buildType": "apk"
       },
-      "ios": {
-        "resourceClass": "m1-medium"
+      "env": {
+        "REACT_APP_API_URL": "http://as-spare-part.ttlsystem.com:5000/after-sale-api-mobile",
+        "REACT_APP_PLATFORM" : "MA"
       }
     }
   },

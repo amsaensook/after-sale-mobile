@@ -10,9 +10,9 @@ axios.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem("accessToken");
 
     config.timeout = 1000 * 10
-    //config.url = `${REACT_APP_API_URL}${config.url}`;
+    config.url = `${REACT_APP_API_URL}${config.url}`;
     //config.url = `${'http://as-spare-part.ttlsystem.com:5000/after-sale-api-mobile'}${config.url}`;
-    config.url = `${'http://119.59.105.14/after-sale-api-mobile'}${config.url}`;
+    //config.url = `${'http://119.59.105.14/after-sale-api-mobile'}${config.url}`;
     //config.headers = { 'Content-Type': 'multipart/form-data' }
     
     if (token) {

@@ -22,7 +22,7 @@ import Logo from "../../assets/toto.svg";
 
 const Login: React.FC = () => {
   const toast = useToast();
-  console.log('LOGINNNNN');
+  // console.log('LOGINNNNN');
   const {
     control,
     handleSubmit,
@@ -92,7 +92,6 @@ const Login: React.FC = () => {
               )}
               name="username"
               rules={{ required: "Username is required" }}
-              defaultValue="pakorn.wo"
             />
             <FormControl.ErrorMessage>
               {errors.username?.message}
@@ -129,7 +128,6 @@ const Login: React.FC = () => {
               )}
               name="password"
               rules={{ required: "Password is required" }}
-              defaultValue="1234"
             />
 
             <FormControl.ErrorMessage>
